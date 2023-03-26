@@ -16,9 +16,6 @@ import invidious_api
 
 
 class InvidiousPlugin:
-    # special lists provided by the Invidious API
-    SPECIAL_LISTS = ("trending", "popular")
-
     def __init__(self, base_url, addon_handle, args):
         self.base_url = base_url
         self.addon_handle = addon_handle
@@ -86,11 +83,13 @@ class InvidiousPlugin:
         # assemble menu with the results
         self.display_list_of_videos(results)
 
-    def display_special_list(self, special_list_name):
-        if special_list_name not in self.__class__.SPECIAL_LISTS:
-            raise ValueError(str(special_list_name) + " is not a valid special list")
+    def display_trending_list(self):
+        videos = self.api_client.fetch_trending()
 
-        videos = self.api_client.fetch_special_list(special_list_name)
+        self.display_list_of_videos(videos)
+
+    def display_popular_list(self):
+        videos = self.api_client.fetch_popular()
 
         self.display_list_of_videos(videos)
 
@@ -131,9 +130,11 @@ class InvidiousPlugin:
         # video search item
         add_list_item(self.addon.getLocalizedString(30002), "search_video")
 
-        for special_list_name in self.__class__.SPECIAL_LISTS:
-            label = special_list_name[0].upper() + special_list_name[1:]
-            add_list_item(label, special_list_name)
+        # Trending list
+        add_list_item("Trending", "trending")
+
+        # Popular list
+        add_list_item("Popular", "popular")
 
         self.end_of_directory()
 
@@ -167,9 +168,11 @@ class InvidiousPlugin:
             elif action == "view_channel":
                 self.display_channel_list(self.args["channel_id"][0])
 
-            elif action in self.__class__.SPECIAL_LISTS:
-                special_list_name = action
-                self.display_special_list(special_list_name)
+            elif action == "trending":
+                self.display_trending_list()
+
+            elif action == "popular":
+                self.display_popular_list()
 
             else:
                 raise RuntimeError("unknown action " + action)
