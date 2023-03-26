@@ -45,7 +45,8 @@ class InvidiousPlugin:
     def display_list_of_videos(self, videos):
         # extracted from display_search
         for video in videos:
-            list_item = xbmcgui.ListItem(video.title)
+            title = f"[B]{video.author}[/B] - {video.title}"
+            list_item = xbmcgui.ListItem(title)
 
             list_item.setArt({
                 "thumb": video.thumbnail_url,
@@ -54,9 +55,9 @@ class InvidiousPlugin:
             datestr = datetime.utcfromtimestamp(video.published).date().isoformat()
 
             list_item.setInfo("video", {
-                "title": video.title,
+                "title": title,
                 "mediatype": "video",
-                "plot": video.description,
+                "plot": f"{title}\n\n{video.description}",
                 "credits": video.author,
                 "date": datestr,
                 "dateadded": datestr,
