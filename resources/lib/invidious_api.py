@@ -47,29 +47,28 @@ class InvidiousAPIClient:
     def parse_video_list_response(self, response):
         data = response.json()
         for video in data:
-            if not video["type"] == "video":
-                continue
-            for thumb in video["videoThumbnails"]:
-                # high appears to be ~480x360, which is a reasonable trade-off
-                # works well on 1080p
-                if thumb["quality"] == "high":
-                    thumbnail_url = thumb["url"]
-                    break
+            if video["type"] in ["video", "shortVideo"] and video["lengthSeconds"] > 0:
+                for thumb in video["videoThumbnails"]:
+                    # high appears to be ~480x360, which is a reasonable trade-off
+                    # works well on 1080p
+                    if thumb["quality"] == "high":
+                        thumbnail_url = thumb["url"]
+                        break
 
-            # as a fallback, we just use the last one in the list (which is usually the lowest quality)
-            else:
-                thumbnail_url = video["videoThumbnails"][-1]["url"]
-        
-            yield VideoListItem(
-                video["videoId"],
-                video["title"],
-                video["author"],
-                video.get("description", self.addon.getLocalizedString(30000)),
-                thumbnail_url,
-                video["viewCount"],
-                video["published"],
-                video["lengthSeconds"]
-            )
+                # as a fallback, we just use the last one in the list (which is usually the lowest quality)
+                else:
+                    thumbnail_url = video["videoThumbnails"][-1]["url"]
+
+                yield VideoListItem(
+                    video["videoId"],
+                    video["title"],
+                    video["author"],
+                    video.get("description", self.addon.getLocalizedString(30000)),
+                    thumbnail_url,
+                    video["viewCount"],
+                    video["published"],
+                    video["lengthSeconds"]
+                )
 
     def search(self, *terms):
         params = {
